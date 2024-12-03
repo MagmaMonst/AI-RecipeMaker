@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 app.get('/', (req, res) => {
   res.send('Server is running! Add an endpoint like /recipes to use the API.');
 });
