@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset = "UTF-8">
+    <meta name = "viewport" content = "width = device-width, intitial-scale = 1.0">
+    <title>AI Recipe Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+            max-width:400px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color:#999;
+            cursor:not-allowed;
+        }
+        .recipe {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            text-align: left;
+            display: inline-block;
+            width: 90%;
+            max-width: 600px;
+        }
+        .recipe img {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            display: block;
+            border-radius: 5px;
+        }
+    </style>
+</head> 
+
+<body>
+    <h1>AI Recipe Generator</h1>
+    <input type = "text" id = "dishName" placeholder = "Enter dish name">
+    <br>
+    <button id = "generateRecipeButton">Get Recipe</button>
+    <div id = "recipeContainer" class = "recipe" style = "display: none;">
+        <h2 id = "recipeTitle"></h2>
+        <img id = "recipeImage" src = "" alt = "Recipe Image">
+        <p><strong>Category:</strong><span id = "recipeCategory"></span></p>
+        <p><strong>Area:</strong><span id = "recipeArea"></span></p>
+        <h3>Ingredients:</h3>
+        <ul id = "recipeIngredients"></ul>
+        <h3>Instructions:</h3>
+        <p id = "recipeInstructions"></p>
+    </div>
+
+    <script>
+        const button = document.getElementById('generateRecipeButton');
+        const dishNameInput = document.getElementById('dishName');
+        const recipeContainer = document.getElementById('recipeContainer');
+        const recipeTitle = document.getElementById('recipeTitle');
+        const recipeImage = document.getElementById('recipeImage');
+        const recipeCategory = document.getElementById('recipeCategory');
+        const recipeArea = document.getElementById('recipeArea');
+        const recipeIngredients = document.getElementById('recipeIngredients');
+        const recipeInstructions = document.getElementById('recipeInstructions');
+
+        button.addEventListener('click', async () => {
+            const dishName = dishNameInput.value.trim();
+            if (!dishName) {
+                alert('Please enter a dish name!');
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Generating...';
+
+            try {
+                const response = await fetch('http://localhost:5000/generate-recipe', {
+                    method: 'POST', 
+                    headers: {'Content-Type' : 'application/json'}, 
+                    body: JSON.stringify({dishName}),
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    recipeTitle.textContent = data.name;
+                    recipeImage.src = data.image;
+                    recipeCategory.textContent = data.category;
+                    recipeArea.textContent = data.area;
+                    recipeIngredients.innerHTML = data.ingredients
+                        .map(item => `<li>${item.ingredient} - ${item.measure}</li>`)
+                        .join('');
+                    recipeInstructions.textContent = data.instructions;
+
+                    recipeContainer.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error fetching recipe:', error);
+                alert('Something went wrong. Please try again.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Get Recipe';
+            }
+        });
+    </script>
+</body>    
+</html>
+
+                                                    
